@@ -1,3 +1,7 @@
 *.class
 *.swp
 /sanity.txt
+
+# intellij things
+*.iml
+.idea/

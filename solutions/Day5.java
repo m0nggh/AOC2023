@@ -61,57 +61,17 @@ public class Day5 {
             }
 
             // overlapping interval confirmed
-
-            // four scenarios for comparing trio interval against [x, y]
-            // scenario 1: a < x and b < y
-            if (a < x && b < y) {
-                // map range: [x, b]: treat x or b as the currSeed
-                long diff = x - a;
-                long mappedStart = trio.dest + diff;
-                diff = b - a;
-                long mappedEnd = trio.dest + diff;
-                mappedIntervals.add(new long[]{ mappedStart, mappedEnd });
-                x = b;
+            long leftEnd = Math.max(a, x);
+            long rightEnd = Math.min(b, y);
+            // map range: [leftEnd, rightEnd]: treat left or right as the currSeed
+            long mappedStart = trio.dest + leftEnd - a;
+            long mappedEnd = trio.dest + rightEnd - a;
+            mappedIntervals.add(new long[]{ mappedStart, mappedEnd });
+            // add unmapped intervals if present
+            if (a > x) {
+                mappedIntervals.add(new long[]{ x, a - 1 });
             }
-
-            // scenario 2: a < x and b >= y
-            if (a < x && b >= y) {
-                // map range: [x, y]: treat x or y as the currSeed
-                long diff = x - a;
-                long mappedStart = trio.dest + diff;
-                long mappedEnd = trio.dest + diff;
-                mappedIntervals.add(new long[]{ mappedStart, mappedEnd });
-                if (x == 12950548) {
-                    System.out.println("mapped start: " + mappedStart + ", mapped end: " + mappedEnd);
-                }
-                return mappedIntervals; // no more intervals to map
-            }
-
-            // scenario 3: a > x and b < y
-            if (a >= x && b < y) {
-                // map range: [a, b]: treat a or b as the currSeed
-                long mappedStart = trio.dest; // (a - a)
-                long diff = b - a;
-                long mappedEnd = trio.dest + diff;
-                mappedIntervals.add(new long[]{ mappedStart, mappedEnd });
-                if (a > x) {
-                    mappedIntervals.add(new long[]{ x, a - 1 }); // add unmapped interval
-                }
-                x = b;
-            }
-
-            // scenario 4: a > x and b >= y
-            if (a >= x && b >= y) {
-                // map range: [a, y]: treat a or y as the currSeed
-                long mappedStart = trio.dest; // (a - a)
-                long diff = y - a;
-                long mappedEnd = trio.dest + diff;
-                mappedIntervals.add(new long[]{ mappedStart, mappedEnd });
-                if (a > x) {
-                    mappedIntervals.add(new long[]{ x, a - 1 }); // add unmapped interval
-                }
-                return mappedIntervals; // no more intervals to map
-            }
+            x = b; // update left interval
         }
         // add last unmapped interval
         mappedIntervals.add(new long[]{ x, y });
@@ -126,23 +86,21 @@ public class Day5 {
             long end = start + seeds.get(i + 1);
             List<long[]> intervals = new ArrayList<>();
             intervals.add(new long[]{ start, end });
-            System.out.println("new seed");
+            System.out.println("Seed start: " + start + ", number of values: " + seeds.get(i + 1));
             for (List<Trio> trioList : listOfMaps) {
                 List<long[]> newIntervals = new ArrayList<>(); // this stores all newly mapped intervals with a new map
-            //    System.out.println("old intervals length: " + intervals.size());
                 for (long[] interval : intervals) {
                     // break down interval into multiple intervals based on map and add to new intervals
                     List<long[]> mappedIntervals = generateMappedIntervals(interval, trioList);
                     for (long[] mappedInterval : mappedIntervals) {
-            //            System.out.println(Arrays.toString(mappedInterval));
                         newIntervals.add(mappedInterval);
                     }
                 }
-             //   System.out.println("new intervals length: " + newIntervals.size());
                 // replace intervals with new intervals and repeat
                 intervals = new ArrayList<>(newIntervals);
             }
             // check through intervals for the current seed range for minimum value by looking at the left of every interval
+            System.out.println("Number of intervals: " + intervals.size());
             for (long[] interval : intervals) {
                 min = Math.min(interval[0], min);
             }
@@ -183,7 +141,6 @@ public class Day5 {
             // sort by source for part 2
             Collections.sort(trioList, (x, y) -> Long.compare(x.source, y.source));
             listOfMaps.add(trioList);
-            System.out.println(trioList);
             mapCount++;
         }
         System.out.printf("Answer for part one: %d%n", calculatePartOne());

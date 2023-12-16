@@ -39,7 +39,7 @@ public class Day4 {
                 cardsWonArray[i + j] += cardsWonArray[i]; 
             }
         }
-        // accummulate all cards count
+        // accumulate all cards count
         int ans = 0;
         for (int count : cardsWonArray) {
             ans += count;
